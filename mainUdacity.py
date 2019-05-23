@@ -138,16 +138,6 @@ def main():
         plt.axis('off')
         plt.show()
 
-
-    # Example image
-    x = Image.open(traindir + 'ewer/image_0085.jpg')
-    np.array(x).shape
-    imshow(x)
-
-    x = Image.open(traindir + 'joshua_tree/image_0004.jpg')
-    np.array(x).shape
-    imshow(x)
-
     # Image transformations
     image_transforms = {
         # Train uses data augmentation
@@ -163,7 +153,7 @@ def main():
                                  [0.229, 0.224, 0.225])  # Imagenet standards
         ]),
         # Validation does not use augmentation
-        'val':
+        'valid':
         transforms.Compose([
             transforms.Resize(size=256),
             transforms.CenterCrop(size=224),
@@ -227,8 +217,8 @@ def main():
     data = {
         'train':
         datasets.ImageFolder(root=traindir, transform=image_transforms['train']),
-        'val':
-        datasets.ImageFolder(root=validdir, transform=image_transforms['val']),
+        'valid':
+        datasets.ImageFolder(root=validdir, transform=image_transforms['valid']),
         'test':
         datasets.ImageFolder(root=testdir, transform=image_transforms['test'])
     }
@@ -236,7 +226,7 @@ def main():
     # Dataloader iterators
     dataloaders = {
         'train': DataLoader(data['train'], batch_size=batch_size, shuffle=True),
-        'val': DataLoader(data['val'], batch_size=batch_size, shuffle=True),
+        'valid': DataLoader(data['valid'], batch_size=batch_size, shuffle=True),
         'test': DataLoader(data['test'], batch_size=batch_size, shuffle=True)
     }
 
@@ -353,7 +343,7 @@ def main():
               valid_loader,
               save_file_name,
               max_epochs_stop=3,
-              n_epochs=20,
+              n_epochs=2,
               print_every=2):
         """Train a PyTorch Model
 
@@ -547,7 +537,7 @@ def main():
         criterion,
         optimizer,
         dataloaders['train'],
-        dataloaders['val'],
+        dataloaders['valid'],
         save_file_name=save_file_name,
         max_epochs_stop=5,
         n_epochs=30,
@@ -692,7 +682,7 @@ def main():
         criterion,
         optimizer,
         dataloaders['train'],
-        dataloaders['val'],
+        dataloaders['valid'],
         save_file_name=save_file_name,
         max_epochs_stop=5,
         n_epochs=30,
@@ -731,8 +721,7 @@ def main():
 
         return img_tensor
 
-    x = process_image(testdir + 'dragonfly/image_0015.jpg')
-    x.shape
+    # x = process_image(testdir + 'dragonfly/image_0015.jpg')
 
     ax, image = imshow_tensor(x)
 
@@ -957,13 +946,13 @@ def main():
     print(f'Final test top 1 weighted accuracy = {top1_weighted:.2f}%')
     print(f'Final test top 5 weighted accuracy = {top5_weighted:.2f}%')
 
-    croc1 = '/home/wjk68/test/crocodile/image_0002.jpg'
-    croc2 = '/home/wjk68/test/crocodile/image_0004.jpg'
-    croc3 = '/home/wjk68/test/crocodile/image_0006.jpg'
+    # croc1 = '/home/wjk68/test/crocodile/image_0002.jpg'
+    # croc2 = '/home/wjk68/test/crocodile/image_0004.jpg'
+    # croc3 = '/home/wjk68/test/crocodile/image_0006.jpg'
 
-    display_prediction(croc1, model, 5)
-    display_prediction(croc2, model, 5)
-    display_prediction(croc3, model, 5)
+    # display_prediction(croc1, model, 5)
+    # display_prediction(croc2, model, 5)
+    # display_prediction(croc3, model, 5)
 
     def display_category(model, category, n=4):
         """Display predictions for a category
@@ -982,9 +971,11 @@ def main():
 
 
 from classes.InputDatasetCreator import InputDatasetCreator
+from classes.Graphs import Graphs
 
 if __name__ == '__main__':
     # inputDatasetCreator = InputDatasetCreator('./data/caltech', train_set_percent=50, test_set_percent=25, val_set_percent=25, copy_files=False)
     # inputDatasetCreator.create_test_valid_train_folders_dataset()
+    # Graphs.line_graph()
 
     main()

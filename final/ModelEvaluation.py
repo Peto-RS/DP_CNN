@@ -74,7 +74,6 @@ class ModelEvaluation:
                     losses.append(loss.item())
                     i += 1
 
-        # Send results to a dataframe and calculate average across classes
         results = pd.DataFrame(acc_results, columns=[f'top{i}' for i in topk])
         results['class'] = classes
         results['loss'] = losses

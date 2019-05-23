@@ -17,7 +17,7 @@ import os
 
 
 def main():
-    datasets_to_train = ['./data/hymenoptera_data']
+    datasets_to_train = ['./data/caltech']
     models_to_train = [PyTorchModelsEnum.RESNET18]
 
     for dataset_to_train in datasets_to_train:
@@ -60,6 +60,12 @@ def main():
 
             criterion = nn.CrossEntropyLoss()
 
+            model_ft.class_to_idx = dataset.data['train'].class_to_idx
+            model_ft.idx_to_class = {
+                idx: class_
+                for class_, idx in model_ft.class_to_idx.items()
+            }
+
             model_ft, val_history = ModelTrain.train_model(
                 model=model_ft,
                 dataloaders=dataset.data_loaders,
@@ -82,7 +88,7 @@ def main():
 
             criterion = nn.NLLLoss()
             results = ModelEvaluation.evaluate(model_ft, dataset.data_loaders[GlobalSettings.TEST_DIRNAME], criterion)
-            results.head()
+            print(results.head())
 
 
 if __name__ == '__main__':

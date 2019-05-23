@@ -4,7 +4,7 @@ from enums.PyTorchModelsEnum import PyTorchModelsEnum
 class GlobalSettings:
     BATCH_SIZE = 128
 
-    DATASET_DIR = './data/hymenoptera_data'
+    DATASET_DIR = './data/caltech'
     TRAIN_DIRNAME = 'train'
     VALID_DIRNAME = 'valid'
     TEST_DIRNAME = 'test'

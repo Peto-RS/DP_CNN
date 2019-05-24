@@ -15,8 +15,34 @@ import os
 
 
 def main():
-    datasets_to_train = ['./data/hymenoptera_data']
-    models_to_train = [PyTorchModelsEnum.RESNET18]
+    datasets_to_train = ['./data/fingerprints']
+    models_to_train = [
+        PyTorchModelsEnum.ALEXNET,
+        PyTorchModelsEnum.VGG11,
+        # PyTorchModelsEnum.VGG11_BN,
+        # PyTorchModelsEnum.VGG13,
+        # PyTorchModelsEnum.VGG13_BN,
+        # PyTorchModelsEnum.VGG16,
+        # PyTorchModelsEnum.VGG16_BN,
+        PyTorchModelsEnum.VGG19,
+        # PyTorchModelsEnum.VGG19_BN,
+        PyTorchModelsEnum.RESNET18,
+        # PyTorchModelsEnum.RESNET34,
+        PyTorchModelsEnum.RESNET50,
+        # PyTorchModelsEnum.RESNET101,
+        PyTorchModelsEnum.RESNET152,
+        # PyTorchModelsEnum.SQUEEZENET1_0,
+        PyTorchModelsEnum.SQUEEZENET1_1,
+        PyTorchModelsEnum.DENSENET121,
+        # PyTorchModelsEnum.DENSENET161,
+        # PyTorchModelsEnum.DENSENET169,
+        PyTorchModelsEnum.DENSENET201,
+        PyTorchModelsEnum.INCEPTION_V3
+    ]
+
+    # models_to_train = [
+    #     PyTorchModelsEnum.ALEXNET
+    # ]
 
     for dataset_to_train in datasets_to_train:
         GlobalSettings.DATASET_DIR = dataset_to_train
@@ -38,7 +64,7 @@ def main():
             )
 
             dataset = Dataset()
-            DatasetAnalyser.show_dataset_analysis(save_on_disk=True)
+            # DatasetAnalyser.show_dataset_analysis(save_on_disk=True)
 
             # Detect if we have a GPU available
             device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -67,6 +93,8 @@ def main():
                 for class_, idx in model_ft.class_to_idx.items()
             }
 
+            # class_names = dataset.data['train'].classes
+
             model_ft, history = ModelTrain.train_model(
                 model=model_ft,
                 dataloaders=dataset.data_loaders,
@@ -77,6 +105,8 @@ def main():
             )
 
             ModelEvaluation.train_valid_graph(history=history, save_on_disk=True)
+
+            # ModelEvaluation.visualize_model(model_ft, dataset.data_loaders['test'], class_names)
 
             criterion = nn.NLLLoss()
             results = ModelEvaluation.evaluate(model_ft, dataset.data_loaders[GlobalSettings.TEST_DIRNAME], criterion)

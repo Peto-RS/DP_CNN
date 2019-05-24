@@ -2,7 +2,7 @@ from enums.PyTorchModelsEnum import PyTorchModelsEnum
 
 
 class GlobalSettings:
-    BATCH_SIZE = 128
+    BATCH_SIZE = 32
 
     DATASET_DIR = './data/fingerprints'
     TRAIN_DIRNAME = 'train'
@@ -16,7 +16,7 @@ class GlobalSettings:
     FEATURE_EXTRACT = False
     CNN_MODEL = PyTorchModelsEnum.RESNET152
     CNN_USE_SIMPLE_CLASSIFIER = True
-    NUM_EPOCHS = 2
+    NUM_EPOCHS = 10
 
     IMG_SIZE = 224
 

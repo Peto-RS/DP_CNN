@@ -24,3 +24,6 @@ class PyTorchModelsEnum(Enum):
     DENSENET201 = 'densenet201',
     INCEPTION_V3 = 'inception_v3',
     GOOGLENET = 'googlenet'
+
+    def __str__(self):
+        return str(self.value)

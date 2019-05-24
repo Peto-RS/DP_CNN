@@ -1,4 +1,5 @@
 import copy
+import numpy as np
 import time
 import torch
 
@@ -12,7 +13,8 @@ class ModelTrain:
 
         since = time.time()
 
-        val_acc_history = []
+        train_history = []
+        valid_history = []
 
         best_model_wts = copy.deepcopy(model.state_dict())
         best_acc = 0.0
@@ -75,8 +77,11 @@ class ModelTrain:
                 if phase == GlobalSettings.VALID_DIRNAME and epoch_acc > best_acc:
                     best_acc = epoch_acc
                     best_model_wts = copy.deepcopy(model.state_dict())
+
+                if phase == GlobalSettings.TRAIN_DIRNAME:
+                    train_history.append([epoch_acc, epoch_loss])
                 if phase == GlobalSettings.VALID_DIRNAME:
-                    val_acc_history.append(epoch_acc)
+                    valid_history.append([epoch_acc, epoch_loss])
 
             print()
 
@@ -84,7 +89,12 @@ class ModelTrain:
         print('Training complete in {:.0f}m {:.0f}s'.format(time_elapsed // 60, time_elapsed % 60))
         print('Best valid Acc: {:4f}'.format(best_acc))
 
+        f = open('./' + GlobalSettings.SAVE_FOLDER + '/' + str(GlobalSettings.CNN_MODEL.value[0]) + '/timer.txt', "w")
+        f.write('{:.0f}m {:.0f}s'.format(time_elapsed // 60, time_elapsed % 60))
+        f.close()
+
         # load best model weights
         model.load_state_dict(best_model_wts)
 
-        return model, val_acc_history
+        return model, np.concatenate((train_history, valid_history), axis=1)
+

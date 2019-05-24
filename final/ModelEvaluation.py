@@ -1,13 +1,59 @@
+from builtins import staticmethod
 from final.GlobalSettings import GlobalSettings
 
+import matplotlib.pyplot as plt
 import numpy as np
 import os
+import seaborn as sns
 import torch
 
 import pandas as pd
 
 
 class ModelEvaluation:
+    @staticmethod
+    def get_top1_accuracy(results, save_on_disk):
+        sns.lmplot(y='top1', x='n_train', data=results, height=6)
+        plt.xlabel('Image Count')
+        plt.ylabel('Accuracy (%)')
+        plt.title(str(GlobalSettings.CNN_MODEL.value[0]).upper() + '\nTop 1 Accuracy vs Number of Training Images')
+        plt.ylim(-5, 105)
+
+        if save_on_disk:
+            plt.savefig(GlobalSettings.SAVE_FOLDER + '/' + str(GlobalSettings.CNN_MODEL.value[0]) + '/top1.png', bbox_inches='tight')
+        else:
+            plt.show()
+
+    @staticmethod
+    def train_valid_graph(history, save_on_disk):
+        history = pd.DataFrame(history, columns=['train_acc', 'train_loss', 'valid_acc', 'valid_loss'])
+
+        plt.figure(figsize=(8, 6))
+        for c in ['train_loss', 'valid_loss']:
+            plt.plot(history[c], label=("Train Loss" if c == 'train_loss' else "Valid Loss"))
+        plt.legend()
+        plt.xlabel('Epoch')
+        plt.ylabel('Average Negative Log Likelihood')
+        plt.title(str(GlobalSettings.CNN_MODEL.value[0]).upper() + '\nTraining and Validation Losses')
+
+        if save_on_disk:
+            plt.savefig(GlobalSettings.SAVE_FOLDER + '/' + str(GlobalSettings.CNN_MODEL.value[0]) + '/trainingLoss.png', bbox_inches='tight')
+        else:
+            plt.show()
+
+        plt.figure(figsize=(8, 6))
+        for c in ['train_acc', 'valid_acc']:
+            plt.plot(100 * history[c], label=("Train Acc" if c == 'train_acc' else "Valid Acc"))
+        plt.legend()
+        plt.xlabel('Epoch')
+        plt.ylabel('Average Accuracy')
+        plt.title(str(GlobalSettings.CNN_MODEL.value[0]).upper() + '\nTraining and Validation Accuracy')
+
+        if save_on_disk:
+            plt.savefig(GlobalSettings.SAVE_FOLDER + '/' + str(GlobalSettings.CNN_MODEL.value[0]) + '/trainingAcc.png', bbox_inches='tight')
+        else:
+            plt.show()
+
     @staticmethod
     def accuracy(output, target, topk=(1,)):
         """Compute the topk accuracy(s)"""
@@ -34,7 +80,7 @@ class ModelEvaluation:
             return res
 
     @staticmethod
-    def evaluate(model, test_loader, criterion, topk=(1, 5)):
+    def evaluate(model, test_loader, criterion, topk=(1, 1)):
         """Measure the performance of a trained PyTorch model
 
         Params

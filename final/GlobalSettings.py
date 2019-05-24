@@ -4,7 +4,7 @@ from enums.PyTorchModelsEnum import PyTorchModelsEnum
 class GlobalSettings:
     BATCH_SIZE = 128
 
-    DATASET_DIR = './data/caltech'
+    DATASET_DIR = './data/fingerprints'
     TRAIN_DIRNAME = 'train'
     VALID_DIRNAME = 'valid'
     TEST_DIRNAME = 'test'
@@ -16,7 +16,7 @@ class GlobalSettings:
     FEATURE_EXTRACT = False
     CNN_MODEL = PyTorchModelsEnum.RESNET152
     CNN_USE_SIMPLE_CLASSIFIER = True
-    NUM_EPOCHS = 5
+    NUM_EPOCHS = 2
 
     IMG_SIZE = 224
 

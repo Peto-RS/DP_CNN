@@ -6,9 +6,7 @@ from final.ModelEvaluation import ModelEvaluation
 from final.PyTorchModels import PyTorchModels
 from enums.PyTorchModelsEnum import PyTorchModelsEnum
 
-import matplotlib.pyplot as plt
-
-import numpy as np
+import pandas as pd
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -17,7 +15,7 @@ import os
 
 
 def main():
-    datasets_to_train = ['./data/caltech']
+    datasets_to_train = ['./data/hymenoptera_data']
     models_to_train = [PyTorchModelsEnum.RESNET18]
 
     for dataset_to_train in datasets_to_train:
@@ -25,19 +23,22 @@ def main():
 
         for model_name in models_to_train:
             GlobalSettings.CNN_MODEL = model_name
+            GlobalSettings.TRAIN_DIR = GlobalSettings.DATASET_DIR + '/' + GlobalSettings.TRAIN_DIRNAME
+            GlobalSettings.VALID_DIR = GlobalSettings.DATASET_DIR + '/' + GlobalSettings.VALID_DIRNAME
+            GlobalSettings.TEST_DIR = GlobalSettings.DATASET_DIR + '/' + GlobalSettings.TEST_DIRNAME
+            GlobalSettings.NUM_CLASSES = len(os.listdir(GlobalSettings.TRAIN_DIR))
 
-            print('MODEL NAME: ' + str(GlobalSettings.CNN_MODEL))
-            print('DATASET_DIR: ' + str(GlobalSettings.DATASET_DIR))
+            print('CNN MODEL NAME: ' + str(GlobalSettings.CNN_MODEL))
 
             model_ft = PyTorchModels.get_cnn_model(
                 model_name=GlobalSettings.CNN_MODEL,
-                num_classes=len(os.listdir(GlobalSettings.TRAIN_DIR)),
+                num_classes=GlobalSettings.NUM_CLASSES,
                 feature_extract=GlobalSettings.FEATURE_EXTRACT,
                 use_pretrained=True
             )
 
             dataset = Dataset()
-            # DatasetAnalyser.show_dataset_analysis(save_on_disk=False)
+            DatasetAnalyser.show_dataset_analysis(save_on_disk=True)
 
             # Detect if we have a GPU available
             device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -66,7 +67,7 @@ def main():
                 for class_, idx in model_ft.class_to_idx.items()
             }
 
-            model_ft, val_history = ModelTrain.train_model(
+            model_ft, history = ModelTrain.train_model(
                 model=model_ft,
                 dataloaders=dataset.data_loaders,
                 criterion=criterion,
@@ -75,20 +76,36 @@ def main():
                 is_inception=(GlobalSettings.CNN_MODEL == PyTorchModelsEnum.INCEPTION_V3)
             )
 
-            ohist = [h.cpu().numpy() for h in val_history]
-
-            plt.title("Validation Accuracy vs. Number of Training Epochs")
-            plt.xlabel("Training Epochs")
-            plt.ylabel("Validation Accuracy")
-            plt.plot(range(1, GlobalSettings.NUM_EPOCHS + 1), ohist, label="Pretrained")
-            plt.ylim((0, 1.))
-            plt.xticks(np.arange(1, GlobalSettings.NUM_EPOCHS + 1, 1.0))
-            plt.legend()
-            plt.show()
+            ModelEvaluation.train_valid_graph(history=history, save_on_disk=True)
 
             criterion = nn.NLLLoss()
             results = ModelEvaluation.evaluate(model_ft, dataset.data_loaders[GlobalSettings.TEST_DIRNAME], criterion)
+            # print(results.head())
+            pd.DataFrame(results).to_csv(GlobalSettings.SAVE_FOLDER + "/" + GlobalSettings.CNN_MODEL.value[0] + "/stats.csv")
+
+            cat_df = DatasetAnalyser.get_dataset_statistic()
+            results = results.merge(cat_df, left_on='class', right_on='Category').drop(columns=['Category'])
             print(results.head())
+            ModelEvaluation.get_top1_accuracy(results=results, save_on_disk=True)
+
+            # Weighted column of test images
+            results['weighted'] = results['n_test'] / results['n_test'].sum()
+
+            # Create weighted accuracies
+            for i in (1, GlobalSettings.NUM_CLASSES):
+                results[f'weighted_top{i}'] = results['weighted'] * results[f'top{i}']
+
+            # Find final accuracy accounting for frequencies
+            top1_weighted = results['weighted_top1'].sum()
+            loss_weighted = (results['weighted'] * results['loss']).sum()
+
+            print(f'Final test cross entropy per image = {loss_weighted:.4f}.')
+            print(f'Final test top 1 weighted accuracy = {top1_weighted:.2f}%')
+
+            f = open('./' + GlobalSettings.SAVE_FOLDER + '/' + str(GlobalSettings.CNN_MODEL.value[0]) + '/testAcc.txt',
+                     "w")
+            f.write(str(top1_weighted) + '\n')
+            f.close()
 
 
 if __name__ == '__main__':

@@ -16,8 +16,8 @@ class DataAugmentationModelTrain:
     resize_image_size_single_enabled = False
     resize_image_size_single = 224
     resize_image_size_wh_enabled = True
-    resize_image_width = 224
-    resize_image_height = 224
+    resize_image_width = 64
+    resize_image_height = 64
     random_horizontal_flip_enabled = False
     random_horizontal_flip_probability = 0.5
     random_vertical_flip_enabled = False

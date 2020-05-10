@@ -1,4 +1,4 @@
-import imagehash
+# import imagehash
 import os
 import random
 from shutil import copyfile

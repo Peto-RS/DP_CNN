@@ -28,12 +28,12 @@ class AppModel:
         self.model['dataset_directory_with_classes'] = './saves/dataset_classes/minutiae'
         self.model['dataset_is_test_set_enabled'] = True
         self.model['dataset_test_dir_name'] = 'test'
-        self.model['dataset_test_set_percentage'] = 25
+        self.model['dataset_test_set_percentage'] = 15
         self.model['dataset_train_dir_name'] = 'train'
-        self.model['dataset_train_set_percentage'] = 50
-        self.model['dataset_train_test_valid_directory'] = './saves/dataset_train_test_valid/minutiae'
+        self.model['dataset_train_set_percentage'] = 70
+        self.model['dataset_train_test_valid_directory'] = './saves/dataset_train_test_valid/minutiae/minutiae_basic'
         self.model['dataset_valid_dir_name'] = 'valid'
-        self.model['dataset_valid_set_percentage'] = 25
+        self.model['dataset_valid_set_percentage'] = 15
 
         ###
         # testing
@@ -46,8 +46,8 @@ class AppModel:
         ###
         # training
         ###
-        self.model['training_batch_size'] = 8
-        self.model['training_epochs_count'] = 5
+        self.model['training_batch_size'] = 32
+        self.model['training_epochs_count'] = 50
         self.model['training_cnn_models_to_train'] = [PyTorchModelsEnum.ALEXNET]
         self.model['training_criterion'] = CriterionEnum.CROSS_ENTROPY_LOSS
         self.model['training_dropout'] = 0.0

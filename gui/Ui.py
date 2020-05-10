@@ -548,8 +548,11 @@ class Ui(QtWidgets.QMainWindow):
             y_true, y_pred, probabilities = ModelEvaluation.get_predictions(model, dataloader_test)
             PrettyPrintConfusionMatrix.plot(y_true, y_pred, classes=dataloader_test.dataset.classes)
 
-            ModelEvaluation.get_accuracy(dataloader_test, model)
-            ModelEvaluation.get_accuracy_classes(dataloader_test, model)
+            # ModelEvaluation.get_accuracy(dataloader_test, model)
+            # ModelEvaluation.get_accuracy_classes(dataloader_test, model)
+            # ModelEvaluation.plot_roc_curve(model, dataloader_test)
+            # ModelEvaluation.get_accuracy(dataloader_test, model)
+            # ModelEvaluation.get_accuracy_classes(dataloader_test, model)
 
     def set_pushButton_testing_confusion_matrix_class(self):
         self.pushButton_testing_confusion_matrix.clicked.connect(self.pushButton_testing_confusion_matrix_clicked)

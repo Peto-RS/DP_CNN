@@ -84,12 +84,15 @@ class ModelEvaluation:
 
     @staticmethod
     def get_predictions(model, dataloader):
+        model.to(torch.device("cuda:0"))
         model.eval()
         labels = []
         predictions = []
         probabilities = []
         for i, batch in enumerate(dataloader):
             data, label = batch  # ignore label
+            data = data.cuda()
+            label = label.cuda()
             outputs = model(data)
             _, preds = torch.max(outputs.data, 1)
             labels.extend(label.tolist())

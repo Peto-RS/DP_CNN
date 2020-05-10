@@ -1,0 +1,3 @@
+class CriterionEnum:
+    CROSS_ENTROPY_LOSS = 'CROSS_ENTROPY_LOSS'
+    NLL_LOSS = 'NLL_LOSS'

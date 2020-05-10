@@ -1,0 +1,2 @@
+class ActivationFunctionEnum:
+    RELU = 'RELU'

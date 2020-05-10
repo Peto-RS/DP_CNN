@@ -1,9 +1,9 @@
-from final.Dataset import Dataset
-from final.DatasetAnalyser import DatasetAnalyser
-from final.GlobalSettings import GlobalSettings
-from final.ModelTrain import ModelTrain
-from final.ModelEvaluation import ModelEvaluation
-from final.PyTorchModels import PyTorchModels
+from old.Dataset import Dataset
+from classes.DatasetAnalyser import DatasetAnalyser
+from old.GlobalSettings import GlobalSettings
+from classes.ModelTraining import ModelTrain
+from classes.ModelEvaluation import ModelEvaluation
+from classes.PyTorchModels import PyTorchModels
 from enums.PyTorchModelsEnum import PyTorchModelsEnum
 
 import pandas as pd
@@ -125,7 +125,7 @@ def main():
             for i in (1, GlobalSettings.NUM_CLASSES):
                 results[f'weighted_top{i}'] = results['weighted'] * results[f'top{i}']
 
-            # Find final accuracy accounting for frequencies
+            # Find old accuracy accounting for frequencies
             top1_weighted = results['weighted_top1'].sum()
             loss_weighted = (results['weighted'] * results['loss']).sum()
 

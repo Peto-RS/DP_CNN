@@ -1,4 +1,4 @@
-from final.GlobalSettings import GlobalSettings
+from old.GlobalSettings import GlobalSettings
 from PIL import Image
 import matplotlib.pyplot as plt
 import numpy as np
@@ -9,7 +9,8 @@ import seaborn as sns
 
 class DatasetAnalyser:
     @staticmethod
-    def get_dataset_statistic():
+    def get_dataset_statistic(dataset_train_test_valid_directory, dataset_train_dir_name, dataset_test_dir_name,
+                              dataset_valid_dir_name):
         categories = []
         img_categories = []
         n_train = []
@@ -18,12 +19,12 @@ class DatasetAnalyser:
         hs = []
         ws = []
 
-        for d in os.listdir(GlobalSettings.TRAIN_DIR):
+        for d in os.listdir(os.path.join(dataset_train_test_valid_directory, dataset_train_dir_name)):
             categories.append(d)
 
-            train_imgs = os.listdir(GlobalSettings.TRAIN_DIR + '/' + d)
-            valid_imgs = os.listdir(GlobalSettings.VALID_DIR + '/' + d)
-            test_imgs = os.listdir(GlobalSettings.TEST_DIR + '/' + d)
+            train_imgs = os.listdir(os.path.join(dataset_train_test_valid_directory, dataset_train_dir_name, d))
+            valid_imgs = os.listdir(os.path.join(dataset_train_test_valid_directory, dataset_valid_dir_name, d))
+            test_imgs = os.listdir(os.path.join(dataset_train_test_valid_directory, dataset_test_dir_name, d))
             n_train.append(len(train_imgs))
             n_valid.append(len(valid_imgs))
             n_test.append(len(test_imgs))
@@ -31,7 +32,7 @@ class DatasetAnalyser:
             # Find stats for train images
             for i in train_imgs:
                 img_categories.append(d)
-                img = Image.open(GlobalSettings.TRAIN_DIR + '/' + d + '/' + i)
+                img = Image.open(os.path.join(dataset_train_test_valid_directory, dataset_train_dir_name, d, i))
                 img_array = np.array(img)
 
                 hs.append(img_array.shape[0])
@@ -50,7 +51,8 @@ class DatasetAnalyser:
         return cat_df
 
     @staticmethod
-    def show_dataset_analysis(save_on_disk):
+    def plot_dataset_analysis(dataset_train_test_valid_directory, dataset_train_dir_name, dataset_test_dir_name,
+                              dataset_valid_dir_name):
         categories = []
         img_categories = []
         n_train = []
@@ -59,12 +61,12 @@ class DatasetAnalyser:
         hs = []
         ws = []
 
-        for d in os.listdir(GlobalSettings.TRAIN_DIR):
+        for d in os.listdir(os.path.join(dataset_train_test_valid_directory, dataset_train_dir_name)):
             categories.append(d)
 
-            train_imgs = os.listdir(GlobalSettings.TRAIN_DIR + '/' + d)
-            valid_imgs = os.listdir(GlobalSettings.VALID_DIR + '/' + d)
-            test_imgs = os.listdir(GlobalSettings.TEST_DIR + '/' + d)
+            train_imgs = os.listdir(os.path.join(dataset_train_test_valid_directory, dataset_train_dir_name, d))
+            valid_imgs = os.listdir(os.path.join(dataset_train_test_valid_directory, dataset_valid_dir_name, d))
+            test_imgs = os.listdir(os.path.join(dataset_train_test_valid_directory, dataset_test_dir_name, d))
             n_train.append(len(train_imgs))
             n_valid.append(len(valid_imgs))
             n_test.append(len(test_imgs))
@@ -72,7 +74,7 @@ class DatasetAnalyser:
             # Find stats for train images
             for i in train_imgs:
                 img_categories.append(d)
-                img = Image.open(GlobalSettings.TRAIN_DIR + '/' + d + '/' + i)
+                img = Image.open(os.path.join(dataset_train_test_valid_directory, dataset_train_dir_name, d, i))
                 img_array = np.array(img)
 
                 hs.append(img_array.shape[0])
@@ -95,10 +97,7 @@ class DatasetAnalyser:
         plt.ylabel('Count')
         plt.title('Training Images by Category')
 
-        if save_on_disk:
-            plt.savefig(GlobalSettings.SAVE_FOLDER + '/IMAGE_COUNT_BY_CATEGORY.png', bbox_inches='tight')
-        else:
-            plt.show()
+        plt.show()
 
         image_df = pd.DataFrame({
             'Category': img_categories,
@@ -120,8 +119,4 @@ class DatasetAnalyser:
         plt.ylabel('Density')
         plt.title('Average Size Distribution')
 
-        if save_on_disk:
-            plt.savefig(GlobalSettings.SAVE_FOLDER + '/AVERAGE_SIZE_DISTRIBUTION.png', bbox_inches='tight')
-        else:
-            plt.show()
-
+        plt.show()

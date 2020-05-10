@@ -4,7 +4,7 @@ import seaborn as sns
 from torchvision import transforms, datasets, models
 import torch
 from torch import optim, cuda
-from torch.utils.data import DataLoader, sampler
+from torch.utils.data import DataLoader
 import torch.nn as nn
 
 import warnings
@@ -269,15 +269,15 @@ def main():
         model = nn.DataParallel(model)
 
     def get_pretrained_model(model_name):
-        """Retrieve a pre-trained model from torchvision
+        """Retrieve a pre-trained app_model from torchvision
 
         Params
         -------
-            model_name (str): name of the model (currently only accepts vgg16 and resnet50)
+            model_name (str): name of the app_model (currently only accepts vgg16 and resnet50)
 
         Return
         --------
-            model (PyTorch model): cnn
+            app_model (PyTorch app_model): cnn
 
         """
 
@@ -349,19 +349,19 @@ def main():
 
         Params
         --------
-            model (PyTorch model): cnn to train
+            app_model (PyTorch app_model): cnn to train
             criterion (PyTorch loss): objective to minimize
-            optimizer (PyTorch optimizier): optimizer to compute gradients of model parameters
+            optimizer (PyTorch optimizier): optimizer to compute gradients of app_model parameters
             train_loader (PyTorch dataloader): training dataloader to iterate through
             valid_loader (PyTorch dataloader): validation dataloader used for early stopping
-            save_file_name (str ending in '.pt'): file path to save the model state dict
+            save_file_name (str ending in '.pt'): file path to save the app_model state dict
             max_epochs_stop (int): maximum number of epochs with no improvement in validation loss for early stopping
             n_epochs (int): maximum number of training epochs
             print_every (int): frequency of epochs to print training stats
 
         Returns
         --------
-            model (PyTorch model): trained cnn with best weights
+            app_model (PyTorch app_model): trained cnn with best weights
             history (DataFrame): history of train and validation loss and accuracy
         """
 
@@ -372,7 +372,7 @@ def main():
         valid_max_acc = 0
         history = []
 
-        # Number of epochs already trained (if using loaded in model weights)
+        # Number of epochs already trained (if using loaded in app_model weights)
         try:
             print(f'Model has been trained for: {model.epochs} epochs.\n')
         except:
@@ -455,8 +455,7 @@ def main():
                         # Calculate validation accuracy
                         _, pred = torch.max(output, dim=1)
                         correct_tensor = pred.eq(target.data.view_as(pred))
-                        accuracy = torch.mean(
-                            correct_tensor.type(torch.FloatTensor))
+                        accuracy = torch.mean(correct_tensor.type(torch.FloatTensor))
                         # Multiply average accuracy times the number of examples
                         valid_acc += accuracy.item() * data.size(0)
 
@@ -479,9 +478,9 @@ def main():
                             f'\t\tTraining Accuracy: {100 * train_acc:.2f}%\t Validation Accuracy: {100 * valid_acc:.2f}%'
                         )
 
-                    # Save the model if validation loss decreases
+                    # Save the app_model if validation loss decreases
                     if valid_loss < valid_loss_min:
-                        # Save model
+                        # Save app_model
                         torch.save(model.state_dict(), save_file_name)
                         # Track improvement
                         epochs_no_improve = 0
@@ -562,22 +561,22 @@ def main():
     plt.title('Training and Validation Accuracy')
 
     def save_checkpoint(model, path):
-        """Save a PyTorch model checkpoint
+        """Save a PyTorch app_model checkpoint
 
         Params
         --------
-            model (PyTorch model): model to save
-            path (str): location to save model. Must start with `model_name-` and end in '.pth'
+            app_model (PyTorch app_model): app_model to save
+            path (str): location to save app_model. Must start with `model_name-` and end in '.pth'
 
         Returns
         --------
-            None, save the `model` to `path`
+            None, save the `app_model` to `path`
 
         """
 
         model_name = path.split('-')[0]
         assert (model_name in ['vgg16', 'resnet50'
-                               ]), "Path must have the correct model name"
+                               ]), "Path must have the correct app_model name"
 
         # Basic details
         checkpoint = {
@@ -586,9 +585,9 @@ def main():
             'epochs': model.epochs,
         }
 
-        # Extract the final classifier and the state dictionary
+        # Extract the old classifier and the state dictionary
         if model_name == 'vgg16':
-            # Check to see if model was parallelized
+            # Check to see if app_model was parallelized
             if multi_gpu:
                 checkpoint['classifier'] = model.module.classifier
                 checkpoint['state_dict'] = model.module.state_dict()
@@ -614,22 +613,22 @@ def main():
     save_checkpoint(model, path=checkpoint_path)
 
     def load_checkpoint(path):
-        """Load a PyTorch model checkpoint
+        """Load a PyTorch app_model checkpoint
 
         Params
         --------
-            path (str): saved model checkpoint. Must start with `model_name-` and end in '.pth'
+            path (str): saved app_model checkpoint. Must start with `model_name-` and end in '.pth'
 
         Returns
         --------
-            None, save the `model` to `path`
+            None, save the `app_model` to `path`
 
         """
 
-        # Get the model name
+        # Get the app_model name
         model_name = path.split('-')[0]
         assert (model_name in ['vgg16', 'resnet50'
-                               ]), "Path must have the correct model name"
+                               ]), "Path must have the correct app_model name"
 
         # Load in checkpoint
         checkpoint = torch.load(path)
@@ -728,12 +727,12 @@ def main():
     ax, image = imshow_tensor(process_image(testdir + 'dalmatian/image_0053.jpg'))
 
     def predict(image_path, model, topk=5):
-        """Make a prediction for an image using a trained model
+        """Make a prediction for an image using a trained app_model
 
         Params
         --------
             image_path (str): filename of the image
-            model (PyTorch model): trained model for inference
+            app_model (PyTorch app_model): trained app_model for inference
             topk (int): number of top predictions to return
 
         Returns
@@ -790,7 +789,7 @@ def main():
     top_p, top_classes, real_class
 
     def display_prediction(image_path, model, topk):
-        """Display image and preditions from model"""
+        """Display image and preditions from app_model"""
 
         # Get predictions
         img, ps, classes, y_obs = predict(image_path, model, topk)
@@ -850,11 +849,11 @@ def main():
         accuracy(model(features), targets, topk=(1, 5))
 
     def evaluate(model, test_loader, criterion, topk=(1, 5)):
-        """Measure the performance of a trained PyTorch model
+        """Measure the performance of a trained PyTorch app_model
 
         Params
         --------
-            model (PyTorch model): trained cnn for inference
+            app_model (PyTorch app_model): trained cnn for inference
             test_loader (PyTorch DataLoader): test dataloader
             topk (tuple of ints): accuracy to measure
 
@@ -880,7 +879,7 @@ def main():
                 if train_on_gpu:
                     data, targets = data.to('cuda'), targets.to('cuda')
 
-                # Raw model output
+                # Raw app_model output
                 out = model(data)
                 # Iterate through each example
                 for pred, true in zip(out, targets):
@@ -902,7 +901,7 @@ def main():
         return results.reset_index().rename(columns={'index': 'class'})
 
     criterion = nn.NLLLoss()
-    # Evaluate the model on all the training data
+    # Evaluate the app_model on all the training data
     results = evaluate(model, dataloaders['test'], criterion)
     results.head()
 
@@ -937,7 +936,7 @@ def main():
     for i in (1, 5):
         results[f'weighted_top{i}'] = results['weighted'] * results[f'top{i}']
 
-    # Find final accuracy accounting for frequencies
+    # Find old accuracy accounting for frequencies
     top1_weighted = results['weighted_top1'].sum()
     top5_weighted = results['weighted_top5'].sum()
     loss_weighted = (results['weighted'] * results['loss']).sum()
@@ -950,9 +949,9 @@ def main():
     # croc2 = '/home/wjk68/test/crocodile/image_0004.jpg'
     # croc3 = '/home/wjk68/test/crocodile/image_0006.jpg'
 
-    # display_prediction(croc1, model, 5)
-    # display_prediction(croc2, model, 5)
-    # display_prediction(croc3, model, 5)
+    # display_prediction(croc1, app_model, 5)
+    # display_prediction(croc2, app_model, 5)
+    # display_prediction(croc3, app_model, 5)
 
     def display_category(model, category, n=4):
         """Display predictions for a category
@@ -969,9 +968,6 @@ def main():
     display_category(model, 'anchor')
     display_category(model, 'mandolin')
 
-
-from classes.InputDatasetCreator import InputDatasetCreator
-from classes.Graphs import Graphs
 
 if __name__ == '__main__':
     # inputDatasetCreator = InputDatasetCreator('./data/caltech', train_set_percent=50, test_set_percent=25, val_set_percent=25, copy_files=False)

@@ -456,12 +456,12 @@ class Ui(QtWidgets.QMainWindow):
         self.pushButton_dataset_show_analysis.clicked.connect(self.pushButton_dataset_show_analysis_clicked)
 
     def pushButton_dataset_show_analysis_clicked(self):
-        DatasetAnalyser.plot_dataset_analysis(
+        print(DatasetAnalyser.get_dataset_statistic(
             dataset_train_test_valid_directory=self.app_model.model['dataset_train_test_valid_directory'],
             dataset_train_dir_name=self.app_model.model['dataset_train_dir_name'],
             dataset_test_dir_name=self.app_model.model['dataset_test_dir_name'],
             dataset_valid_dir_name=self.app_model.model['dataset_valid_dir_name']
-        )
+        ))
 
     def set_pushButton_run_samples_distribution(self):
         self.pushButton_run_samples_distribution.clicked.connect(self.pushButton_run_samples_distribution_clicked)
@@ -549,7 +549,6 @@ class Ui(QtWidgets.QMainWindow):
             y_true, y_pred, probabilities = ModelEvaluation.get_predictions(model, dataloader_test)
             PrettyPrintConfusionMatrix.plot(y_true, y_pred, classes=dataloader_test.dataset.classes)
 
-            ModelEvaluation.plot_roc_curve(model, dataloader_test)
             ModelEvaluation.get_accuracy(dataloader_test, model)
             ModelEvaluation.get_accuracy_classes(dataloader_test, model)
 
@@ -563,7 +562,21 @@ class Ui(QtWidgets.QMainWindow):
         self.pushButton_testing_roc_curve.clicked.connect(self.pushButton_testing_roc_curve_clicked)
 
     def pushButton_testing_roc_curve_clicked(self):
-        print('pushButton_testing_roc_curve_clicked')
+        dataloader_test = DataLoader(
+            Dataset.get_dataset(os.path.join(self.app_model.model['dataset_train_test_valid_directory'],
+                                             self.app_model.model['dataset_test_dir_name']),
+                                self.app_model.model['dataset_data_augmentation_test_enabled'],
+                                self.app_model.model['dataset_data_augmentation_test']),
+            batch_size=self.app_model.model['training_batch_size'],
+            shuffle=True
+        )
+
+        for model_id in self.app_model.model['testing_saved_models_selected']:
+
+            model = ModelIO.load(os.path.join(self.app_model.model['testing_saved_models_directory'], model_id))
+            ModelEvaluation.plot_roc_curve(model, dataloader_test)
+
+            print('pushButton_testing_roc_curve_clicked')
 
     def set_pushButton_testing_top_k_accuracy(self):
         self.pushButton_testing_top_k_accuracy.clicked.connect(self.pushButton_testing_top_k_accuracy_clicked)

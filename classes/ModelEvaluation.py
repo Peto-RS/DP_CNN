@@ -54,13 +54,9 @@ class ModelEvaluation:
             plt.savefig(os.path.join(path, 'valid_acc_loss_graph_' + datetime.now().strftime("%Y%m%d_%H%M%S") + '.png'), bbox_inches='tight')
 
     @staticmethod
-    def plot_roc_curve(model, dataloader):
+    def plot_roc_curve(model, dataloader, actuals, probabilities, class_indexes, print_micro, print_macro):
         plt.figure()
         n_classes = ['dot', 'overlap']
-        """
-        compute ROC curve and ROC area for each class in each fold
-
-        """
 
         fpr = dict()
         tpr = dict()

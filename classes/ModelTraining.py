@@ -191,7 +191,7 @@ class ModelTraining:
                             signals['console_append'].emit('Best validation accuracy: {:4f}'.format(best_acc))
                             accuracy_loss_history.append([train_acc, train_loss, valid_acc, valid_loss])
                             model.load_state_dict(best_model_wts)
-                            return model
+                            return model, accuracy_loss_history
 
             accuracy_loss_history.append([train_acc, train_loss, valid_acc, valid_loss])
 

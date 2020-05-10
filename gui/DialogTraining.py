@@ -75,6 +75,7 @@ class DialogTraining(QtWidgets.QDialog):
 
     @staticmethod
     def plot_train_valid_acc_loss_graph(accuracy_loss_history, model_name):
+        print()
         ModelEvaluation.train_valid_acc_loss_graph(history=accuracy_loss_history, model_name=model_name,
                                                    save=AppModel.get_instance().model[
                                                        'training_save_train_valid_graph'],

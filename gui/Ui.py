@@ -1,6 +1,5 @@
 import os
 
-import torch
 from torch.utils.data.dataloader import DataLoader
 
 import webbrowser
@@ -572,9 +571,9 @@ class Ui(QtWidgets.QMainWindow):
         )
 
         for model_id in self.app_model.model['testing_saved_models_selected']:
-
             model = ModelIO.load(os.path.join(self.app_model.model['testing_saved_models_directory'], model_id))
-            ModelEvaluation.plot_roc_curve(model, dataloader_test)
+            _, _, _ = ModelEvaluation.get_predictions(model, dataloader_test)
+            # ModelEvaluation.plot_roc_curve(model, dataloader_test)
 
             print('pushButton_testing_roc_curve_clicked')
 

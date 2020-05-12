@@ -3,12 +3,14 @@ from datetime import datetime
 
 from sklearn.metrics import roc_curve, auc, accuracy_score
 from torch import nn
+from PIL import Image
 
 from classes.Utils import Utils
 from old.GlobalSettings import GlobalSettings
 
 import matplotlib.pyplot as plt
 import matplotlib.ticker
+import matplotlib.patches as patches
 
 import numpy as np
 import os
@@ -51,25 +53,30 @@ class ModelEvaluation:
             path = os.path.join(training_evaluation_directory, model_name)
             path = Utils.create_folder_if_not_exists(path)
 
-            plt.savefig(os.path.join(path, 'valid_acc_loss_graph_' + datetime.now().strftime("%Y%m%d_%H%M%S") + '.png'), bbox_inches='tight')
+            plt.savefig(os.path.join(path, 'valid_acc_loss_graph_' + datetime.now().strftime("%Y%m%d_%H%M%S") + '.png'),
+                        bbox_inches='tight')
 
     @staticmethod
-    def plot_roc_curve(model, dataloader, actuals, probabilities, class_indexes, print_micro, print_macro):
+    def plot_roc_curve(model, dataloader, classes):
         plt.figure()
-        n_classes = ['dot', 'overlap']
 
         fpr = dict()
         tpr = dict()
         roc_auc = dict()
-        for i in range(len(n_classes)):
+        for i in range(len(classes)):
             actuals, probabilities = test_class_probabilities(model, dataloader, i)
             fpr[i], tpr[i], threshold = roc_curve(actuals, probabilities)
             roc_auc[i] = auc(fpr[i], tpr[i])
 
         # plt.figure(figsize=(6,6))
-        for i in range(len(n_classes)):
+        for i in range(len(classes)):
             plt.plot(fpr[i], tpr[i], label='ROC curve of class {0} (area = {1:0.2f})'
-                                           ''.format(i, roc_auc[i]))  # roc_auc_score
+                                           ''.format(classes[i], roc_auc[i]))  # roc_auc_score
+
+        # # # Compute micro-average ROC curve and ROC area
+        # all_labels = sum([i for i in range(len(classes))] * len(p))
+        # fpr["micro"], tpr["micro"], _ = roc_curve(all_labels, sum(p, []))
+        # roc_auc["micro"] = auc(fpr["micro"], tpr["micro"])
 
         plt.plot([0, 1], [0, 1], 'k--')
         # plt.grid()
@@ -77,7 +84,7 @@ class ModelEvaluation:
         plt.ylim([0.0, 1.05])
         plt.xlabel('False Positive Rate')
         plt.ylabel('True Positive Rate')
-        plt.title('Receiver operating characteristic to multi-class')
+        plt.title('Receiver operating characteristic')
         plt.legend(loc="lower right")
         # plt.tight_layout()
         plt.show()
@@ -104,6 +111,60 @@ class ModelEvaluation:
         return labels, predictions, probabilities
 
     @staticmethod
+    def predict(pil_image, model, class_names, all_classes, sliding_window_height, sliding_window_width, step,
+                probability_threshold, tensor_height, tensor_width):
+        model.eval()
+        model.to('cuda:0')
+
+        colors = {'bifurcation': 'lime', 'ending': 'r', 'nothing': 'y', 'dot': 'm', 'overlap': 'b'}
+
+        image_width = tensor_width
+        image_height = tensor_height
+
+        def pr(model, img_tensor):
+            with torch.no_grad():
+                outputs = model(img_tensor)
+                _, predicted = torch.max(outputs.data, 1)
+
+                m = torch.nn.Softmax(dim=1)
+                outputs = m(outputs)
+                # print(outputs)
+                return predicted, outputs[0][predicted]
+
+        image = pil_image
+
+        fig, ax = plt.subplots(1)
+
+        stepSize = step
+        w_width, w_height = sliding_window_width, sliding_window_height  # window size
+        for x in range(0, image.shape[1] - w_width, stepSize):
+            for y in range(0, image.shape[0] - w_height, stepSize):
+                window = image[x:x + w_width, y:y + w_height, :]
+                # plt.imshow(window)
+                # plt.show()
+                img_tensor = process_image(window, image_width, image_height)
+                # plt.imshow(img_tensor.permute(1, 2, 0))
+                # plt.show()
+                img_tensor = img_tensor.view(1, 3, image_height, image_width).cuda()
+
+                pred, prob = pr(model, img_tensor)
+                predicted_class_string = all_classes[pred]
+                if predicted_class_string in class_names and prob > probability_threshold:
+                    color = colors[predicted_class_string] if (predicted_class_string in colors) else 'k'
+                    ax.add_patch(
+                        patches.Rectangle((x, y), w_width, w_height, linewidth=1, edgecolor=color, facecolor='none'))
+
+        legend_elements = []
+        for class_name in all_classes:
+            color = colors[class_name] if (class_name in colors) else 'k'
+
+            legend_elements.append(patches.Rectangle((0, 0), 20, 20, color=color, label=class_name))
+
+        ax.legend(handles=legend_elements, loc='upper right')
+        ax.imshow(pil_image)
+        plt.show()
+
+    @staticmethod
     def get_accuracy(dataset_dataloader_test, model):
         correct = 0
         total = 0
@@ -115,8 +176,7 @@ class ModelEvaluation:
                 total += labels.size(0)
                 correct += (predicted == labels).sum().item()
 
-        print('Accuracy of the network on the 10000 test images: %d %%' % (
-                100 * correct / total))
+        return 100 * correct / total
 
     @staticmethod
     def get_accuracy_classes(dataset_dataloader_test, model):
@@ -135,9 +195,10 @@ class ModelEvaluation:
                     class_correct[label] += c[i].item()
                     class_total[label] += 1
 
+        accuracy_classes = ''
         for i in range(len(classes)):
-            print('Accuracy of %5s : %2d %%' % (
-                classes[i], 100 * class_correct[i] / class_total[i]))
+            accuracy_classes += 'Accuracy of %5s : %2d %%' % (
+                classes[i], 100 * class_correct[i] / class_total[i])
 
 
 def test_class_probabilities(model, test_loader, n_class):
@@ -154,7 +215,7 @@ def test_class_probabilities(model, test_loader, n_class):
             updated_list = [int(bool) for bool in (labels == n_class).tolist()]
             actuals.extend(updated_list)
 
-            m = torch.nn.Softmax()
+            m = torch.nn.Softmax(dim=1)
             outputs = m(outputs)
             probabilities.extend(outputs[:, n_class].tolist())
 
@@ -174,6 +235,25 @@ def get_top1_accuracy(results, save_on_disk):
                     bbox_inches='tight')
     else:
         plt.show()
+
+
+def process_image(pil_image, img_width, img_height):
+    # Resize
+    img = Image.fromarray(pil_image).resize((img_height, img_width))
+
+    # Convert to numpy, transpose color dimension and normalize
+    img = np.array(img).transpose((2, 0, 1)) / 256
+
+    # Standardization
+    means = np.array([0.485, 0.456, 0.406]).reshape((3, 1, 1))
+    stds = np.array([0.229, 0.224, 0.225]).reshape((3, 1, 1))
+
+    img = img - means
+    img = img / stds
+
+    img_tensor = torch.Tensor(img)
+
+    return img_tensor
 
 
 @staticmethod

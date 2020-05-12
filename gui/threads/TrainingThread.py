@@ -16,6 +16,7 @@ class TrainingThread(QObject):
     label_training_model_name_text_changed = pyqtSignal(str)
     plot_train_valid_acc_loss_graph = pyqtSignal(object, str)
     progressBar_training_set_value_changed = pyqtSignal(float)
+    premature_training_end_triggered = pyqtSignal()
 
     def __init__(self, app_model):
         super(TrainingThread, self).__init__()
@@ -83,7 +84,10 @@ class TrainingThread(QObject):
                                        'label_epoch_current_total_text_changed': self.label_epoch_current_total_text_changed,
                                        'label_training_model_name_text_changed': self.label_training_model_name_text_changed,
                                        'progressBar_training_set_value_changed': self.progressBar_training_set_value_changed,
-                                       'plot_train_valid_acc_loss_graph': self.plot_train_valid_acc_loss_graph
-                                   })
+                                       'plot_train_valid_acc_loss_graph': self.plot_train_valid_acc_loss_graph,
+                                       'premature_training_end_triggered': self.premature_training_end_triggered
+                                   },
+                                   training_weight_decay=self.app_model.model['training_weight_decay'])
 
+        self.app_model.model['premature_training_end_triggered'] = False
         self.finished.emit()

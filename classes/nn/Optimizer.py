@@ -3,15 +3,18 @@ import torch.optim as optim
 
 from enums.OptimizerEnum import OptimizerEnum
 
+
 class Optimizer:
     @staticmethod
-    def get_optimizer(model, training_feature_extract, training_optimizer_name, training_learning_rate, training_momentum):
+    def get_optimizer(model, training_feature_extract, training_optimizer_name, training_learning_rate,
+                      training_momentum, training_weight_decay):
         params_to_update = Optimizer.get_params_to_update(model, training_feature_extract)
 
         if OptimizerEnum.SGD == training_optimizer_name:
-            return optim.SGD(params_to_update, lr=training_learning_rate, momentum=training_momentum)
+            return optim.SGD(params_to_update, lr=training_learning_rate, momentum=training_momentum,
+                             weight_decay=training_weight_decay)
         elif OptimizerEnum.ADAM == training_optimizer_name:
-            return optim.Adam(params_to_update, lr=training_learning_rate)
+            return optim.Adam(params_to_update, lr=training_learning_rate, weight_decay=training_weight_decay)
 
     @staticmethod
     def get_params_to_update(model, training_feature_extract):

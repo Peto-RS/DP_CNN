@@ -95,6 +95,13 @@
    <item>
     <widget class="QTextBrowser" name="textBrowser_training"/>
    </item>
+   <item>
+    <widget class="QPushButton" name="pushButton_premature_training_end_triggered">
+     <property name="text">
+      <string>Finish training after current epoch</string>
+     </property>
+    </widget>
+   </item>
   </layout>
  </widget>
  <resources/>

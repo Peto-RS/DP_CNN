@@ -25,13 +25,13 @@ class AppModel:
         self.model['dataset_data_augmentation_valid'] = DataAugmentationModelValid()
         self.model['dataset_data_augmentation_valid_enabled'] = True
         self.model['dataset_diff_hash_threshold'] = 16  # TODO
-        self.model['dataset_directory_with_classes'] = './saves/dataset_classes/minutiae'
+        self.model['dataset_directory_with_classes'] = './data/dataset_classes/minutiae_basic'
         self.model['dataset_is_test_set_enabled'] = True
         self.model['dataset_test_dir_name'] = 'test'
         self.model['dataset_test_set_percentage'] = 15
         self.model['dataset_train_dir_name'] = 'train'
         self.model['dataset_train_set_percentage'] = 70
-        self.model['dataset_train_test_valid_directory'] = './saves/dataset_train_test_valid/minutiae/minutiae_basic'
+        self.model['dataset_train_test_valid_directory'] = './data/dataset_train_test_valid/minutiae_basic'
         self.model['dataset_valid_dir_name'] = 'valid'
         self.model['dataset_valid_set_percentage'] = 15
 
@@ -39,9 +39,10 @@ class AppModel:
         # testing
         ###
         self.model['testing_dataset_class_name_selected'] = []
-        self.model['testing_dataset_test_directory'] = './saves/dataset_train_test_valid/minutiae/test'
-        self.model['testing_saved_models_directory'] = './saves/models'
+        self.model['testing_dataset_test_directory'] = './data/dataset_train_test_valid/minutiae_basic/test'
+        self.model['testing_saved_models_directory'] = './data/models'
         self.model['testing_saved_models_selected'] = []
+        self.model['premature_training_end_triggered'] = False
 
         ###
         # training
@@ -52,12 +53,12 @@ class AppModel:
         self.model['training_criterion'] = CriterionEnum.CROSS_ENTROPY_LOSS
         self.model['training_dropout'] = 0.0
         self.model['training_epochs_early_stopping'] = 5
-        self.model['training_evaluation_directory'] = './saves/evaluation'
+        self.model['training_evaluation_directory'] = './data/evaluation'
         self.model['training_feature_extract'] = True
         self.model['training_learning_rate'] = 0.001
         self.model['training_lr_gamma'] = 0.1
         self.model['training_lr_step_size'] = 7
-        self.model['training_model_output_directory'] = './saves/models'
+        self.model['training_model_output_directory'] = './data/models'
         self.model['training_momentum'] = 0.9
         self.model['training_optimizer'] = OptimizerEnum.SGD
         self.model['training_save_best_model_enabled'] = True
@@ -67,6 +68,7 @@ class AppModel:
         self.model['training_use_gpu'] = True
         self.model['training_use_pretrained_models'] = True
         self.model['training_use_softmax'] = False
+        self.model['training_weight_decay'] = 0.0
 
     def set_to_model(self, key, value):
         self.model[key] = value

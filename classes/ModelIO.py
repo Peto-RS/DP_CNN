@@ -38,7 +38,7 @@ class ModelIO:
                                             training_use_softmax=loaded_model['training_use_softmax'])
         model.load_state_dict(loaded_model['model_state_dict'])
 
-        return loaded_model
+        return model, loaded_model['classes']
 
     @staticmethod
     def save_checkpoint():

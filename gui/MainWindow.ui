@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>878</width>
-    <height>524</height>
+    <width>964</width>
+    <height>542</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,7 +18,7 @@
     <item>
      <widget class="QTabWidget" name="mainTabWidget">
       <property name="currentIndex">
-       <number>1</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="tabSamples">
        <attribute name="title">
@@ -336,7 +336,14 @@
                </property>
               </widget>
              </item>
-             <item row="6" column="1">
+             <item row="6" column="0">
+              <widget class="QLabel" name="label_training_model_output_directory">
+               <property name="text">
+                <string>Model Output Directory</string>
+               </property>
+              </widget>
+             </item>
+             <item row="7" column="0">
               <layout class="QHBoxLayout" name="horizontalLayout_14">
                <item>
                 <widget class="QToolButton" name="toolbutton_training_model_output_directory">
@@ -353,13 +360,6 @@
                 </widget>
                </item>
               </layout>
-             </item>
-             <item row="6" column="0">
-              <widget class="QLabel" name="label_training_model_output_directory">
-               <property name="text">
-                <string>Model Output Directory</string>
-               </property>
-              </widget>
              </item>
             </layout>
            </widget>
@@ -468,7 +468,7 @@
           <item row="1" column="1">
            <widget class="QGroupBox" name="groupBox_5">
             <property name="title">
-             <string>Classifier</string>
+             <string>Regularization</string>
             </property>
             <layout class="QFormLayout" name="formLayout_8">
              <item row="0" column="0">
@@ -491,10 +491,24 @@
                </property>
               </widget>
              </item>
-             <item row="1" column="0">
+             <item row="2" column="0">
               <widget class="QCheckBox" name="checkBox_training_use_softmax">
                <property name="text">
                 <string>Use Softmax</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="label_training_weight_decay">
+               <property name="text">
+                <string>Weight Decay</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QDoubleSpinBox" name="doubleSpinBox_training_weight_decay">
+               <property name="singleStep">
+                <double>0.100000000000000</double>
                </property>
               </widget>
              </item>
@@ -592,14 +606,14 @@
             </layout>
            </widget>
           </item>
-          <item row="2" column="0">
-           <widget class="QPushButton" name="pushButton_training">
-            <property name="text">
-             <string>Run</string>
-            </property>
-           </widget>
-          </item>
          </layout>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushButton_training">
+          <property name="text">
+           <string>Run</string>
+          </property>
+         </widget>
         </item>
        </layout>
       </widget>
@@ -607,20 +621,20 @@
        <attribute name="title">
         <string>Tester</string>
        </attribute>
-       <layout class="QVBoxLayout" name="verticalLayout_9">
+       <layout class="QVBoxLayout" name="verticalLayout_3">
         <item>
          <layout class="QGridLayout" name="gridLayout_2">
-          <item row="2" column="0">
+          <item row="1" column="0">
            <layout class="QVBoxLayout" name="verticalLayout_2">
             <item>
-             <widget class="QLabel" name="label">
-              <property name="text">
-               <string>Directory With Models</string>
-              </property>
-             </widget>
-            </item>
-            <item>
              <layout class="QHBoxLayout" name="horizontalLayout_7">
+              <item>
+               <widget class="QLabel" name="label">
+                <property name="text">
+                 <string>Directory With Models</string>
+                </property>
+               </widget>
+              </item>
               <item>
                <widget class="QToolButton" name="toolbutton_testing_saved_models_directory">
                 <property name="text">
@@ -649,111 +663,124 @@
             </item>
            </layout>
           </item>
-          <item row="2" column="1">
-           <layout class="QVBoxLayout" name="verticalLayout_6">
-            <item>
-             <widget class="QGroupBox" name="groupBox_9">
-              <property name="title">
-               <string>Confusion Matrix</string>
-              </property>
-              <layout class="QVBoxLayout" name="verticalLayout_4">
+          <item row="0" column="0">
+           <widget class="QGroupBox" name="groupBox_12">
+            <property name="title">
+             <string>Testing Dataset</string>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout_9">
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayout_9">
                <item>
-                <widget class="QPushButton" name="pushButton_testing_confusion_matrix">
+                <widget class="QToolButton" name="toolbutton_testing_dataset_test_directory">
                  <property name="text">
-                  <string>Confusion Matrix</string>
+                  <string>...</string>
                  </property>
                 </widget>
                </item>
                <item>
-                <widget class="QPushButton" name="pushButton_testing_confusion_matrix_class">
-                 <property name="text">
-                  <string>Confusion Matrix Class</string>
+                <widget class="QLineEdit" name="lineedit_testing_dataset_test_directory">
+                 <property name="readOnly">
+                  <bool>true</bool>
                  </property>
                 </widget>
                </item>
               </layout>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item row="1" column="0">
-           <layout class="QVBoxLayout" name="verticalLayout_8">
-            <item>
-             <layout class="QHBoxLayout" name="horizontalLayout_9">
-              <item>
-               <widget class="QToolButton" name="toolbutton_testing_dataset_test_directory">
-                <property name="text">
-                 <string>...</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLineEdit" name="lineedit_testing_dataset_test_directory">
-                <property name="readOnly">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-           </layout>
-          </item>
-          <item row="2" column="2">
-           <layout class="QVBoxLayout" name="verticalLayout_3">
-            <property name="spacing">
-             <number>3</number>
-            </property>
-            <property name="rightMargin">
-             <number>0</number>
-            </property>
-            <item>
-             <widget class="QLabel" name="label_dataset_images">
-              <property name="text">
-               <string>Dataset images</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <layout class="QHBoxLayout" name="horizontalLayout_8">
-              <item>
-               <widget class="QToolButton" name="toolbutton_testing_dataset_images">
-                <property name="text">
-                 <string>...</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLineEdit" name="lineedit_testing_dataset_images_directory">
-                <property name="readOnly">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-            <item>
-             <widget class="QListWidget" name="listWidget_dataset_images"/>
-            </item>
-           </layout>
+             </item>
+            </layout>
+           </widget>
           </item>
           <item row="1" column="1">
-           <widget class="QListWidget" name="listWidget_testing_dataset_class_name"/>
+           <widget class="QGroupBox" name="groupBox_8">
+            <property name="title">
+             <string>Fingerprint</string>
+            </property>
+            <layout class="QFormLayout" name="formLayout_10">
+             <item row="0" column="0">
+              <widget class="QLabel" name="label_3">
+               <property name="text">
+                <string>Acc. Threshold</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QDoubleSpinBox" name="doubleSpinBox_fingerprint_threshold">
+               <property name="maximum">
+                <double>1.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.010000000000000</double>
+               </property>
+               <property name="value">
+                <double>0.950000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="label_2">
+               <property name="text">
+                <string>Window Height</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QSpinBox" name="spinBox_fingerprint_window_height">
+               <property name="value">
+                <number>20</number>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="0">
+              <widget class="QPushButton" name="pushButton_select_fingeprint">
+               <property name="text">
+                <string>Select fingerprint</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0">
+              <widget class="QLabel" name="label_4">
+               <property name="text">
+                <string>Window Width</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="1">
+              <widget class="QSpinBox" name="spinBox_fingerprint_window_width">
+               <property name="value">
+                <number>20</number>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="0">
+              <widget class="QLabel" name="label_5">
+               <property name="text">
+                <string>Step</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="1">
+              <widget class="QSpinBox" name="spinBox_fingerprint_window_step">
+               <property name="value">
+                <number>5</number>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
           </item>
           <item row="0" column="1">
-           <widget class="QLabel" name="label_testing_dataset_class_name">
-            <property name="text">
+           <widget class="QGroupBox" name="groupBox_11">
+            <property name="title">
              <string>Class Names</string>
             </property>
+            <layout class="QVBoxLayout" name="verticalLayout_6">
+             <item>
+              <widget class="QListWidget" name="listWidget_testing_dataset_class_name"/>
+             </item>
+            </layout>
            </widget>
           </item>
-          <item row="3" column="1">
-           <widget class="QPushButton" name="pushButton_2">
-            <property name="text">
-             <string>Print Analysis</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="2">
+          <item row="0" column="2">
            <widget class="QGroupBox" name="groupBox_10">
             <property name="title">
              <string>ROC Curve</string>
@@ -769,21 +796,23 @@
             </layout>
            </widget>
           </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_2">
-            <property name="text">
-             <string>Testing Dataset</string>
+          <item row="1" column="2">
+           <widget class="QGroupBox" name="groupBox_9">
+            <property name="title">
+             <string>Confusion Matrix</string>
             </property>
+            <layout class="QVBoxLayout" name="verticalLayout_4">
+             <item>
+              <widget class="QPushButton" name="pushButton_testing_confusion_matrix">
+               <property name="text">
+                <string>Confusion Matrix</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </widget>
           </item>
          </layout>
-        </item>
-        <item>
-         <widget class="QPushButton" name="pushButton_testing_run">
-          <property name="text">
-           <string>Show accuracy</string>
-          </property>
-         </widget>
         </item>
        </layout>
       </widget>
@@ -796,7 +825,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>878</width>
+     <width>964</width>
      <height>26</height>
     </rect>
    </property>

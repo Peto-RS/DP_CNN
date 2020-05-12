@@ -20,11 +20,14 @@ class DialogTraining(QtWidgets.QDialog):
 
         self.label_epoch_current_total = self.findChild(QtWidgets.QLabel, 'label_epoch_current_total')
         self.label_training_model_name = self.findChild(QtWidgets.QLabel, 'label_training_model_name')
+        self.pushButton_premature_training_end_triggered = self.findChild(QtWidgets.QPushButton,
+                                                                          'pushButton_premature_training_end_triggered')
         self.progressBar_training = self.findChild(QtWidgets.QProgressBar, 'progressBar_training')
         self.textBrowser_training = self.findChild(QtWidgets.QTextBrowser, 'textBrowser_training')
 
     def init_gui(self):
         self.set_textBrowser_training()
+        self.set_pushButton_premature_training_end_triggered()
 
     def train(self):
         self.objThread = QThread()
@@ -37,6 +40,7 @@ class DialogTraining(QtWidgets.QDialog):
         self.obj.label_training_model_name_text_changed.connect(self.label_training_model_name_text_changed)
         self.obj.plot_train_valid_acc_loss_graph.connect(self.plot_train_valid_acc_loss_graph)
         self.obj.progressBar_training_set_value_changed.connect(self.progressBar_training_set_value)
+        self.obj.premature_training_end_triggered.connect(self.premature_training_end_triggered)
 
         self.obj.moveToThread(self.objThread)
         self.obj.finished.connect(self.objThread.quit)
@@ -59,6 +63,16 @@ class DialogTraining(QtWidgets.QDialog):
         self.progressBar_training.setValue(value)
 
     ###
+    # pushButton
+    ###
+    def set_pushButton_premature_training_end_triggered(self):
+        self.pushButton_premature_training_end_triggered.clicked.connect(self.pushButton_premature_training_end_triggered_clicked)
+
+    def pushButton_premature_training_end_triggered_clicked(self):
+        self.pushButton_premature_training_end_triggered.setText('Please wait...')
+        AppModel.get_instance().set_to_model('premature_training_end_triggered', True)
+
+    ###
     # textBrowser
     ###
     def set_textBrowser_training(self):
@@ -75,9 +89,11 @@ class DialogTraining(QtWidgets.QDialog):
 
     @staticmethod
     def plot_train_valid_acc_loss_graph(accuracy_loss_history, model_name):
-        print()
         ModelEvaluation.train_valid_acc_loss_graph(history=accuracy_loss_history, model_name=model_name,
                                                    save=AppModel.get_instance().model[
                                                        'training_save_train_valid_graph'],
                                                    training_evaluation_directory=AppModel.get_instance().model[
                                                        'training_evaluation_directory'])
+
+    def premature_training_end_triggered(self):
+        return AppModel.get_instance().model['premature_training_end_triggered']

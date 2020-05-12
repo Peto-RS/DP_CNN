@@ -4,6 +4,7 @@ from torch.utils.data.dataloader import DataLoader
 
 import webbrowser
 
+import numpy as np
 from classes.Dataset import Dataset
 from classes.DatasetAnalyser import DatasetAnalyser
 from classes.ModelEvaluation import ModelEvaluation
@@ -11,6 +12,7 @@ from classes.ModelIO import ModelIO
 from classes.PyTorchModels import PyTorchModels
 from classes.TrainTestValidDatasetCreator import TrainTestValidDatasetCreator
 from classes.Utils import Utils
+from PIL import Image
 
 from gui.DialogDataAugmentation import DialogDataAugmentation
 from gui.DialogTraining import DialogTraining
@@ -69,6 +71,10 @@ class Ui(QtWidgets.QMainWindow):
                                                                   'doubleSpinBox_training_lr_step_size')
         self.doubleSpinBox_training_momentum = self.findChild(QtWidgets.QDoubleSpinBox,
                                                               'doubleSpinBox_training_momentum')
+        self.doubleSpinBox_training_weight_decay = self.findChild(QtWidgets.QDoubleSpinBox,
+                                                                  'doubleSpinBox_training_weight_decay')
+        self.doubleSpinBox_fingerprint_threshold = self.findChild(QtWidgets.QDoubleSpinBox,
+                                                                  'doubleSpinBox_fingerprint_threshold')
         self.lineedit_dataset_directory_with_classes = self.findChild(QtWidgets.QLineEdit,
                                                                       'lineedit_dataset_directory_with_classes')
         self.lineedit_dataset_train_test_valid_directory = self.findChild(QtWidgets.QLineEdit,
@@ -97,17 +103,17 @@ class Ui(QtWidgets.QMainWindow):
         self.pushButton_data_augmentation_valid = self.findChild(QtWidgets.QPushButton,
                                                                  'pushButton_data_augmentation_valid')
         self.pushButton_dataset_show_analysis = self.findChild(QtWidgets.QPushButton,
-                                                                 'pushButton_dataset_show_analysis')
-        self.pushButton_testing_run = self.findChild(QtWidgets.QPushButton,
-                                                     'pushButton_testing_run')
+                                                               'pushButton_dataset_show_analysis')
         self.pushButton_testing_confusion_matrix = self.findChild(QtWidgets.QPushButton,
                                                                   'pushButton_testing_confusion_matrix')
         self.pushButton_testing_confusion_matrix_class = self.findChild(QtWidgets.QPushButton,
                                                                         'pushButton_testing_confusion_matrix_class')
         self.pushButton_testing_roc_curve = self.findChild(QtWidgets.QPushButton,
-                                                                        'pushButton_testing_roc_curve')
-        self.pushButton_testing_top_k_accuracy = self.findChild(QtWidgets.QPushButton,
-                                                                        'pushButton_testing_top_k_accuracy')
+                                                           'pushButton_testing_roc_curve')
+        self.pushButton_predict_block = self.findChild(QtWidgets.QPushButton,
+                                                       'pushButton_predict_block')
+        self.pushButton_select_fingeprint = self.findChild(QtWidgets.QPushButton,
+                                                           'pushButton_select_fingeprint')
         self.spinbox_dataset_train_set_percentage = self.findChild(QtWidgets.QSpinBox,
                                                                    'spinbox_dataset_train_set_percentage')
         self.spinbox_dataset_test_set_percentage = self.findChild(QtWidgets.QSpinBox,
@@ -116,6 +122,9 @@ class Ui(QtWidgets.QMainWindow):
                                                                    'spinbox_dataset_valid_set_percentage')
         self.spinBox_training_batch_size = self.findChild(QtWidgets.QSpinBox, 'spinBox_training_batch_size')
         self.spinBox_training_epochs_count = self.findChild(QtWidgets.QSpinBox, 'spinBox_training_epochs_count')
+        self.spinBox_fingerprint_window_height = self.findChild(QtWidgets.QSpinBox, 'spinBox_fingerprint_window_height')
+        self.spinBox_fingerprint_window_width = self.findChild(QtWidgets.QSpinBox, 'spinBox_fingerprint_window_width')
+        self.spinBox_fingerprint_window_step = self.findChild(QtWidgets.QSpinBox, 'spinBox_fingerprint_window_step')
         self.spinBox_training_epochs_early_stopping = self.findChild(QtWidgets.QSpinBox,
                                                                      'spinBox_training_epochs_early_stopping')
         self.toolbutton_dataset_directory_with_classes = self.findChild(QtWidgets.QToolButton,
@@ -154,6 +163,7 @@ class Ui(QtWidgets.QMainWindow):
         self.set_doubleSpinBox_training_lr_gamma()
         self.set_doubleSpinBox_training_lr_step_size()
         self.set_doubleSpinBox_training_momentum()
+        self.set_doubleSpinBox_training_weight_decay()
         self.set_lineedit_dataset_directory_with_classes()
         self.set_lineedit_dataset_train_test_valid_directory()
         self.set_lineedit_testing_dataset_test_directory()
@@ -169,11 +179,10 @@ class Ui(QtWidgets.QMainWindow):
         self.set_pushButton_data_augmentation_train()
         self.set_pushButton_data_augmentation_test()
         self.set_pushButton_data_augmentation_valid()
-        self.set_pushButton_testing_run()
         self.set_pushButton_testing_confusion_matrix()
         self.set_pushButton_testing_confusion_matrix_class()
         self.set_pushButton_testing_roc_curve()
-        self.set_pushButton_testing_top_k_accuracy()
+        self.set_pushButton_select_fingeprint()
         self.set_spinbox_dataset_train_set_percentage()
         self.set_spinbox_dataset_test_set_percentage()
         self.set_spinbox_dataset_valid_set_percentage()
@@ -378,6 +387,14 @@ class Ui(QtWidgets.QMainWindow):
     def doubleSpinBox_training_momentum_value_changed(self, value):
         self.app_model.set_to_model('training_momentum', value)
 
+    def set_doubleSpinBox_training_weight_decay(self):
+        self.doubleSpinBox_training_weight_decay.setValue(self.app_model.model['training_weight_decay'])
+        self.doubleSpinBox_training_weight_decay.valueChanged.connect(
+            self.doubleSpinBox_training_weight_decay_value_changed)
+
+    def doubleSpinBox_training_weight_decay_value_changed(self, value):
+        self.app_model.set_to_model('training_weight_decay', value)
+
     ###
     # lineedit
     ###
@@ -510,27 +527,6 @@ class Ui(QtWidgets.QMainWindow):
                                         self.set_data_augmentation_model_valid)
         dialog.exec_()
 
-    def set_pushButton_testing_run(self):
-        self.pushButton_testing_run.clicked.connect(self.pushButton_testing_run_clicked)
-
-    def pushButton_testing_run_clicked(self):
-        dataloader_test = DataLoader(
-            Dataset.get_dataset(os.path.join(self.app_model.model['dataset_train_test_valid_directory'],
-                                             self.app_model.model['dataset_test_dir_name']),
-                                self.app_model.model['dataset_data_augmentation_test_enabled'],
-                                self.app_model.model['dataset_data_augmentation_test']),
-            batch_size=self.app_model.model['training_batch_size'],
-            shuffle=True
-        )
-        # model = PyTorchModels.get_cnn_model('alexnet', 2, False, True)
-        # webbrowser.open('C://Users//hutas//OneDrive - Slovenská technická univerzita v Bratislave//Škola')
-
-        PrettyPrintConfusionMatrix.plot(y_true, y_pred)
-        ModelEvaluation.plot_roc_curve(model, dataloader_test)
-        ModelEvaluation.get_accuracy(dataloader_test, model)
-        ModelEvaluation.get_accuracy_classes(dataloader_test, model)
-        # ModelEvaluation.visualize_model(model, dataloader_test, 8)
-
     def set_pushButton_testing_confusion_matrix(self):
         self.pushButton_testing_confusion_matrix.clicked.connect(self.pushButton_testing_confusion_matrix_clicked)
 
@@ -544,15 +540,9 @@ class Ui(QtWidgets.QMainWindow):
         )
 
         for model_id in self.app_model.model['testing_saved_models_selected']:
-            model = ModelIO.load(os.path.join(self.app_model.model['testing_saved_models_directory'], model_id))
+            model, _ = ModelIO.load(os.path.join(self.app_model.model['testing_saved_models_directory'], model_id))
             y_true, y_pred, probabilities = ModelEvaluation.get_predictions(model, dataloader_test)
             PrettyPrintConfusionMatrix.plot(y_true, y_pred, classes=dataloader_test.dataset.classes)
-
-            # ModelEvaluation.get_accuracy(dataloader_test, model)
-            # ModelEvaluation.get_accuracy_classes(dataloader_test, model)
-            # ModelEvaluation.plot_roc_curve(model, dataloader_test)
-            # ModelEvaluation.get_accuracy(dataloader_test, model)
-            # ModelEvaluation.get_accuracy_classes(dataloader_test, model)
 
     def set_pushButton_testing_confusion_matrix_class(self):
         self.pushButton_testing_confusion_matrix.clicked.connect(self.pushButton_testing_confusion_matrix_clicked)
@@ -565,8 +555,7 @@ class Ui(QtWidgets.QMainWindow):
 
     def pushButton_testing_roc_curve_clicked(self):
         dataloader_test = DataLoader(
-            Dataset.get_dataset(os.path.join(self.app_model.model['dataset_train_test_valid_directory'],
-                                             self.app_model.model['dataset_test_dir_name']),
+            Dataset.get_dataset(self.app_model.model['testing_dataset_test_directory'],
                                 self.app_model.model['dataset_data_augmentation_test_enabled'],
                                 self.app_model.model['dataset_data_augmentation_test']),
             batch_size=self.app_model.model['training_batch_size'],
@@ -574,17 +563,33 @@ class Ui(QtWidgets.QMainWindow):
         )
 
         for model_id in self.app_model.model['testing_saved_models_selected']:
-            model = ModelIO.load(os.path.join(self.app_model.model['testing_saved_models_directory'], model_id))
-            _, _, _ = ModelEvaluation.get_predictions(model, dataloader_test)
-            # ModelEvaluation.plot_roc_curve(model, dataloader_test)
+            model, loaded_classes = ModelIO.load(
+                os.path.join(self.app_model.model['testing_saved_models_directory'], model_id))
+            ModelEvaluation.plot_roc_curve(model, dataloader_test, loaded_classes)
 
-            print('pushButton_testing_roc_curve_clicked')
+    def set_pushButton_select_fingeprint(self):
+        self.pushButton_select_fingeprint.clicked.connect(self.pushButton_select_fingeprint_clicked)
 
-    def set_pushButton_testing_top_k_accuracy(self):
-        self.pushButton_testing_top_k_accuracy.clicked.connect(self.pushButton_testing_top_k_accuracy_clicked)
+    def pushButton_select_fingeprint_clicked(self):
+        path = QFileDialog.getOpenFileName(self, 'OpenFile')
+        if path:
+            image = Image.open(path[0])
+            image = image.convert('RGB')
+            image = np.array(image)
 
-    def pushButton_testing_top_k_accuracy_clicked(self):
-        print('pushButton_testing_top_k_accuracy_clicked')
+            sliding_window_height = self.spinBox_fingerprint_window_height.value()
+            sliding_window_width = self.spinBox_fingerprint_window_width.value()
+            step = self.spinBox_fingerprint_window_step.value()
+            probability_threshold = self.doubleSpinBox_fingerprint_threshold.value()
+
+            for model_id in self.app_model.model['testing_saved_models_selected']:
+                model, loaded_classes = ModelIO.load(
+                    os.path.join(self.app_model.model['testing_saved_models_directory'], model_id))
+                ModelEvaluation.predict(image, model, self.app_model.model['testing_dataset_class_name_selected'],
+                                        loaded_classes, sliding_window_height, sliding_window_width, step,
+                                        probability_threshold,
+                                        self.app_model.model['dataset_data_augmentation_test'].resize_image_height,
+                                        self.app_model.model['dataset_data_augmentation_test'].resize_image_width)
 
     # ###
     # spinbox

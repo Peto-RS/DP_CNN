@@ -7,6 +7,7 @@ import time
 import torch
 import torch.nn as nn
 
+from app_model.AppModel import AppModel
 from classes.ModelEvaluation import ModelEvaluation
 from classes.ModelIO import ModelIO
 from classes.Utils import Utils
@@ -27,7 +28,7 @@ class ModelTraining:
                      training_model_output_directory, training_momentum, training_optimizer,
                      training_save_best_model_enabled, training_scheduler, training_use_gpu,
                      training_use_early_stopping,
-                     training_use_pretrained_models, training_use_softmax, signals):
+                     training_use_pretrained_models, training_use_softmax, training_weight_decay, signals):
         for i, model_id in enumerate(training_cnn_models_to_train):
             signals['label_training_model_name_text_changed'].emit(model_id)
             signals['console_append'].emit('----------\n' + model_id + '\n----------')
@@ -52,7 +53,8 @@ class ModelTraining:
                                                                      training_scheduler=training_scheduler,
                                                                      training_use_pretrained_models=training_use_pretrained_models,
                                                                      training_use_softmax=training_use_softmax,
-                                                                     signals=signals
+                                                                     signals=signals,
+                                                                     training_weight_decay=training_weight_decay
                                                                      )
 
             if training_save_best_model_enabled:
@@ -72,7 +74,7 @@ class ModelTraining:
                     training_lr_gamma,
                     training_lr_step_size, training_momentum, training_optimizer, training_scheduler, training_use_gpu,
                     training_feature_extract, training_epochs_count, training_epochs_early_stopping,
-                    training_use_early_stopping, training_use_pretrained_models, training_use_softmax, signals):
+                    training_use_early_stopping, training_use_pretrained_models, training_use_softmax, training_weight_decay, signals):
         num_classes = len(dataset_dataloader[dataset_train_dir_name].dataset.classes)
         device = ModelTraining.get_device(training_use_gpu=training_use_gpu)
         model = PyTorchModels.get_cnn_model(model_id=model_id, num_classes=num_classes,
@@ -85,7 +87,8 @@ class ModelTraining:
         optimizer = Optimizer.get_optimizer(model, training_feature_extract=training_feature_extract,
                                             training_optimizer_name=training_optimizer,
                                             training_learning_rate=training_learning_rate,
-                                            training_momentum=training_momentum)
+                                            training_momentum=training_momentum,
+                                            training_weight_decay=training_weight_decay)
         scheduler = Scheduler.get_scheduler(optimizer=optimizer, training_scheduler_name=training_scheduler,
                                             training_lr_gamma=training_lr_gamma,
                                             training_lr_step_size=training_lr_step_size)
@@ -201,6 +204,10 @@ class ModelTraining:
                 'Duration: {:.0f}m {:.0f}s'.format(time_elapsed_epoch // 60, time_elapsed_epoch % 60))
             signals['console_append'].emit('\n')
 
+            if AppModel.get_instance().model['premature_training_end_triggered']:
+                signals['console_append'].emit('\nxxxxx\nPremature training end triggered!\nxxxxx\n')
+                break
+
         time_elapsed = time.time() - since
         signals['console_append'].emit(
             'Training duration: {:.0f}m {:.0f}s'.format(time_elapsed // 60, time_elapsed % 60))
@@ -208,6 +215,7 @@ class ModelTraining:
         signals['console_append'].emit('\n')
 
         model.load_state_dict(best_model_wts)
+
         return model, accuracy_loss_history
 
     @staticmethod

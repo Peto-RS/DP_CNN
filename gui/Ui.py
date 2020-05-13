@@ -140,8 +140,9 @@ class Ui(QtWidgets.QMainWindow):
                                                                         'toolbutton_testing_saved_models_directory')
         self.toolbutton_training_evaluation_directory = self.findChild(QtWidgets.QToolButton,
                                                                        'toolbutton_training_evaluation_directory')
-        self.toolbutton_training_model_output_directory = self.findChild(QtWidgets.QToolButton,
-                                                                         'toolbutton_training_model_output_directory')
+        self.toolbutton_training_model_output_directory = self.findChild(QtWidgets.QToolButton, 'toolbutton_training_model_output_directory')
+
+        self.menuBar.triggered.connect(self.menubar_action_triggered)
         self.init_gui()
 
         self.show()
@@ -200,6 +201,8 @@ class Ui(QtWidgets.QMainWindow):
         self.set_toolbutton_training_model_output_directory()
         self.set_toolbutton_training_evaluation_directory()
 
+    def menubar_action_triggered(self):
+        webbrowser.open('')
     ###
     # checkbox
     ###

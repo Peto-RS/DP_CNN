@@ -111,7 +111,7 @@ class ModelEvaluation:
         return labels, predictions, probabilities
 
     @staticmethod
-    def predict(pil_image, model, class_names, all_classes, sliding_window_height, sliding_window_width, step,
+    def predict_fingerprint(pil_image, model, class_names, all_classes, sliding_window_height, sliding_window_width, step,
                 probability_threshold, tensor_height, tensor_width):
         model.eval()
         model.to('cuda:0')
@@ -152,7 +152,7 @@ class ModelEvaluation:
                 if predicted_class_string in class_names and prob > probability_threshold:
                     color = colors[predicted_class_string] if (predicted_class_string in colors) else 'k'
                     ax.add_patch(
-                        patches.Rectangle((x, y), w_width, w_height, linewidth=1, edgecolor=color, facecolor='none'))
+                        patches.Rectangle((x, y), w_width, w_height, edgecolor=color, fill=False))
 
         legend_elements = []
         for class_name in all_classes:
@@ -163,6 +163,36 @@ class ModelEvaluation:
         ax.legend(handles=legend_elements, loc='upper right')
         ax.imshow(pil_image)
         plt.show()
+
+    @staticmethod
+    def predict(pil_image, model, all_classes, tensor_height, tensor_width):
+        model.eval()
+        model.to('cuda:0')
+
+        colors = {'bifurcation': 'lime', 'ending': 'r', 'nothing': 'y', 'dot': 'm', 'overlap': 'b'}
+
+        image_width = tensor_width
+        image_height = tensor_height
+
+        def pr(model, img_tensor):
+            with torch.no_grad():
+                outputs = model(img_tensor)
+                _, predicted = torch.max(outputs.data, 1)
+
+                m = torch.nn.Softmax(dim=1)
+                outputs = m(outputs)
+                # print(outputs)
+                return predicted, outputs[0][predicted]
+
+        image = pil_image
+
+        # fig, ax = plt.subplots(1)
+
+        img_tensor = process_image(image, image_width, image_height)
+        img_tensor = img_tensor.view(1, 3, image_height, image_width).cuda()
+
+        pred, prob = pr(model, img_tensor)
+        return all_classes[pred]
 
     @staticmethod
     def get_accuracy(dataset_dataloader_test, model):

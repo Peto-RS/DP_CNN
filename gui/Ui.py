@@ -23,6 +23,7 @@ from app_model.GuiValues import GuiValues
 from PyQt5 import QtWidgets, uic
 from PyQt5.QtWidgets import QFileDialog, QListWidget
 from PyQt5.QtCore import Qt, QThread
+import matplotlib.pyplot as plt
 
 from utils.PrettyPrintConfusionMatrix import PrettyPrintConfusionMatrix
 
@@ -110,6 +111,8 @@ class Ui(QtWidgets.QMainWindow):
                                                                         'pushButton_testing_confusion_matrix_class')
         self.pushButton_testing_roc_curve = self.findChild(QtWidgets.QPushButton,
                                                            'pushButton_testing_roc_curve')
+        self.pushButton_select_images = self.findChild(QtWidgets.QPushButton,
+                                                           'pushButton_select_images')
         self.pushButton_predict_block = self.findChild(QtWidgets.QPushButton,
                                                        'pushButton_predict_block')
         self.pushButton_select_fingeprint = self.findChild(QtWidgets.QPushButton,
@@ -179,6 +182,7 @@ class Ui(QtWidgets.QMainWindow):
         self.set_pushButton_data_augmentation_train()
         self.set_pushButton_data_augmentation_test()
         self.set_pushButton_data_augmentation_valid()
+        self.set_pushButton_select_images()
         self.set_pushButton_testing_confusion_matrix()
         self.set_pushButton_testing_confusion_matrix_class()
         self.set_pushButton_testing_roc_curve()
@@ -463,6 +467,9 @@ class Ui(QtWidgets.QMainWindow):
 
     def listWidget_testing_saved_models_selection_changed(self):
         selected_items = [item.text() for item in self.listWidget_testing_saved_models.selectedItems()]
+        model, loaded_classes = ModelIO.load(os.path.join(self.app_model.model['testing_saved_models_directory'], selected_items[0]))
+        self.listWidget_testing_dataset_class_name.clear()
+        self.listWidget_testing_dataset_class_name.addItems(loaded_classes)
         self.app_model.set_to_model('testing_saved_models_selected', selected_items)
 
     ###
@@ -585,11 +592,37 @@ class Ui(QtWidgets.QMainWindow):
             for model_id in self.app_model.model['testing_saved_models_selected']:
                 model, loaded_classes = ModelIO.load(
                     os.path.join(self.app_model.model['testing_saved_models_directory'], model_id))
-                ModelEvaluation.predict(image, model, self.app_model.model['testing_dataset_class_name_selected'],
+                ModelEvaluation.predict_fingerprint(image, model, self.app_model.model['testing_dataset_class_name_selected'],
                                         loaded_classes, sliding_window_height, sliding_window_width, step,
                                         probability_threshold,
                                         self.app_model.model['dataset_data_augmentation_test'].resize_image_height,
                                         self.app_model.model['dataset_data_augmentation_test'].resize_image_width)
+
+    def set_pushButton_select_images(self):
+        self.pushButton_select_images.clicked.connect(self.pushButton_select_images_clicked)
+
+    def pushButton_select_images_clicked(self):
+        paths = QFileDialog.getOpenFileNames(self, 'OpenFile')
+
+        pred = None
+        fig, axarr = plt.subplots(1, len(paths[0]))
+        [ax.set_axis_off() for ax in axarr.ravel()]
+        for i, path in enumerate(paths[0]):
+            image = Image.open(path)
+            image = image.convert('RGB')
+            image = np.array(image)
+
+            for j, model_id in enumerate(self.app_model.model['testing_saved_models_selected']):
+                model, loaded_classes = ModelIO.load(
+                    os.path.join(self.app_model.model['testing_saved_models_directory'], model_id))
+                pred = ModelEvaluation.predict(image, model,
+                                        loaded_classes,
+                                        self.app_model.model['dataset_data_augmentation_test'].resize_image_height,
+                                        self.app_model.model['dataset_data_augmentation_test'].resize_image_width)
+            axarr[i].set_title(pred)
+            axarr[i].imshow(image)
+
+        plt.show()
 
     # ###
     # spinbox

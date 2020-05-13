@@ -18,7 +18,7 @@
     <item>
      <widget class="QTabWidget" name="mainTabWidget">
       <property name="currentIndex">
-       <number>2</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="tabSamples">
        <attribute name="title">
@@ -430,7 +430,7 @@
              <item row="1" column="0">
               <widget class="QLabel" name="label_training_epochs_early_stopping">
                <property name="text">
-                <string>Epochs</string>
+                <string>Minimal Epochs</string>
                </property>
               </widget>
              </item>
@@ -730,13 +730,6 @@
                </property>
               </widget>
              </item>
-             <item row="4" column="0">
-              <widget class="QPushButton" name="pushButton_select_fingeprint">
-               <property name="text">
-                <string>Select fingerprint</string>
-               </property>
-              </widget>
-             </item>
              <item row="2" column="0">
               <widget class="QLabel" name="label_4">
                <property name="text">
@@ -762,6 +755,20 @@
               <widget class="QSpinBox" name="spinBox_fingerprint_window_step">
                <property name="value">
                 <number>5</number>
+               </property>
+              </widget>
+             </item>
+             <item row="5" column="0" colspan="2">
+              <widget class="QPushButton" name="pushButton_select_images">
+               <property name="text">
+                <string>Select images for classification</string>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="0" colspan="2">
+              <widget class="QPushButton" name="pushButton_select_fingeprint">
+               <property name="text">
+                <string>Select fingerprint</string>
                </property>
               </widget>
              </item>

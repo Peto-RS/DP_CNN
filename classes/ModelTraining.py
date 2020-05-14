@@ -113,6 +113,7 @@ class ModelTraining:
         accuracy_loss_history = []
         train_loss, valid_loss, train_acc, valid_acc = 0, 0, 0, 0
         best_acc = 0
+        valid_loss_min = np.Inf
         best_model_wts = copy.deepcopy(model.state_dict())
         dataset_sizes = {x: len(dataset_dataloader[x].dataset) for x in
                          [dataset_train_dir_name, dataset_valid_dir_name]}
@@ -178,8 +179,8 @@ class ModelTraining:
                     valid_acc = epoch_acc
                     valid_loss = epoch_loss
 
-                    if epoch_acc > best_acc:
-                        best_acc = epoch_acc
+                    if valid_loss < valid_loss_min:
+                        valid_loss_min = valid_loss
                         best_model_wts = copy.deepcopy(model.state_dict())
                         epochs_no_improve = 0
                     else:

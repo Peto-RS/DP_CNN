@@ -180,6 +180,7 @@ class ModelTraining:
                     valid_loss = epoch_loss
 
                     if valid_loss < valid_loss_min:
+                        best_acc = valid_acc
                         valid_loss_min = valid_loss
                         best_model_wts = copy.deepcopy(model.state_dict())
                         epochs_no_improve = 0

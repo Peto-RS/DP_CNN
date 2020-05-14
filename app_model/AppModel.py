@@ -54,8 +54,8 @@ class AppModel:
         self.model['training_dropout'] = 0.0
         self.model['training_epochs_early_stopping'] = 5
         self.model['training_evaluation_directory'] = './data/evaluation'
-        self.model['training_feature_extract'] = True
-        self.model['training_learning_rate'] = 0.001
+        self.model['training_feature_extract'] = False
+        self.model['training_learning_rate'] = 0.0008
         self.model['training_lr_gamma'] = 0.1
         self.model['training_lr_step_size'] = 7
         self.model['training_model_output_directory'] = './data/models'
